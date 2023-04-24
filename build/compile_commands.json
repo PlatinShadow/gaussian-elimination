@@ -1,0 +1,14 @@
+[
+{
+  "directory": "/mnt/Speed/Dev/C++/Linear-Equation-Solver/build",
+  "command": "/usr/bin/g++ -g -std=gnu++20 -o CMakeFiles/LES.dir/src/Main.cpp.o -c /mnt/Speed/Dev/C++/Linear-Equation-Solver/src/Main.cpp",
+  "file": "/mnt/Speed/Dev/C++/Linear-Equation-Solver/src/Main.cpp",
+  "output": "CMakeFiles/LES.dir/src/Main.cpp.o"
+},
+{
+  "directory": "/mnt/Speed/Dev/C++/Linear-Equation-Solver/build",
+  "command": "/usr/bin/g++ -g -std=gnu++20 -o CMakeFiles/LES.dir/src/Interpreter.cpp.o -c /mnt/Speed/Dev/C++/Linear-Equation-Solver/src/Interpreter.cpp",
+  "file": "/mnt/Speed/Dev/C++/Linear-Equation-Solver/src/Interpreter.cpp",
+  "output": "CMakeFiles/LES.dir/src/Interpreter.cpp.o"
+}
+]
