@@ -1,3 +1,0 @@
-/mnt/Speed/Dev/C++/Linear-Equation-Solver/build/CMakeFiles/LES.dir
-/mnt/Speed/Dev/C++/Linear-Equation-Solver/build/CMakeFiles/edit_cache.dir
-/mnt/Speed/Dev/C++/Linear-Equation-Solver/build/CMakeFiles/rebuild_cache.dir

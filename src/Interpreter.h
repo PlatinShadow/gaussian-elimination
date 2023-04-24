@@ -1,5 +1,6 @@
 #include <sstream>
 #include <optional>
+#include <vector>
 
 namespace LES {
 
@@ -40,7 +41,16 @@ namespace LES {
     */
     class Lexer {
         public:
+            /**
+            * Constructor
+            * @param input the string to be lexed 
+            */
             Lexer(const std::string& input);
+
+            /**
+             * Returns the next token from the string
+             * @returns said token 
+            */
             Token next();
 
         private:
@@ -53,37 +63,50 @@ namespace LES {
             size_t m_Index;
     };
 
+    struct Term {
+        int Scalar;
+        std::string Literal;
+    };
+
     /**
      * Interpreter
      * Interprets a given set of strings and returns the 
      * linear equation system in form of a matrix and coloumn-vector
+     * 
+     * The language (+|-)*((+|-)(NUMBER IDENTIFIER|IDENTIFIER))+ is
+     * implemented as a finite state machine 
      */
     class Interpreter {
     public:
-        Interpreter() = default;
+        Interpreter();
 
         /**
          * Lexes and Parses a line of input
          * @param line the line to lex and parse
-         * @returns true if there was no syntax error
+         * @returns the terms parsed from the line (if no syntax error occured)
         */
-        bool processLine(std::string& line);    
+        std::optional<std::vector<Term>> processLine(std::string& line);
 
     private:
         enum class State {
-            P0 = 0,
-            P1,
-            P2,
-            P3,
+            START = 0,
+            SIGN,
+            NUMBER,
+            IDENTIFIER,
             INVALID
         };
 
-        State parserState0(Token& t);
-        State parserState1(Token& t);
-        State parserState2(Token& t);
-        State parserState3(Token& t);
+        State parserStateStart(Token& t);
+        State parserStateSign(Token& t);
+        State parserStateNumber(Token& t);
+        State parserStateIdentifier(Token& t);
 
         State m_State;
+
+        int m_CurrentSign;
+        int m_CurrentScalar;
+        std::string m_CurrentIdentifier;
+        std::vector<Term> m_Terms;
     };
 
 } // namespace LES

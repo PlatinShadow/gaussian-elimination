@@ -11,12 +11,22 @@ int main() {
     LES::Interpreter interpreter;
 
     std::string line;
+    
+    std::vector<std::vector<LES::Term>> terms; 
+    
     while(std::getline(std::cin, line)) {
-        
         if(line.length() == 1) {
             switch (line[0]) {
-            case 's':
-                break;
+            case 's': {
+                
+                 for(auto term : terms) {
+                    for(auto x : term) {
+                        std::cout << (x.Scalar > 0 ? "+" : "") << x.Scalar << x.Literal;
+                    } 
+                    std::cout << std::endl;
+                 }
+
+                } break;
            
             case 'q':
                 return EXIT_SUCCESS;
@@ -27,8 +37,10 @@ int main() {
             }
         }
 
-        if(interpreter.processLine(line) == false) {
-            std::cout << "Syntax Error" << std::endl;
+        auto result = interpreter.processLine(line);
+
+        if(result.has_value()) {
+            terms.push_back(result.value());
         }
     }
 

@@ -87,74 +87,113 @@ namespace LES {
     /**
      * Interpreter
     */
-    Interpreter::State Interpreter::parserState0(Token& t) {
+    Interpreter::Interpreter() 
+        : m_State(State::START), m_CurrentSign(1), m_CurrentScalar(1), m_CurrentIdentifier("") {}
+   
+    static int intFromSign(const std::string& sign) {
+        return sign == "+" ? 1 : -1;
+    }
+
+    Interpreter::State Interpreter::parserStateStart(Token& t) {
         if(t == Token::Type::SIGN) {
-
-            return State::P1;
+            m_CurrentSign = intFromSign(t.asString());
+            return State::SIGN;
         } else if(t == Token::Type::NUMBER) {
-
-            return State::P2;
+            m_CurrentScalar = t.asInt();
+            return State::NUMBER;
         } else if(t == Token::Type::IDENTIFIER) {
-      
-            return State::P3;
+            m_CurrentIdentifier = t.asString();
+            return State::IDENTIFIER;
         }
+
+        std::cerr << "Syntax Error: Expected NUMBER or IDENTIFIER or SIGN" << std::endl;
 
         return State::INVALID;
     }
 
-    Interpreter::State Interpreter::parserState1(Token& t) {
+    Interpreter::State Interpreter::parserStateSign(Token& t) {
         if(t == Token::Type::NUMBER) {
-            return State::P2;
+            m_CurrentScalar = t.asInt();
+            return State::NUMBER;
         } else if (t == Token::Type::IDENTIFIER) {
-            return State::P3;
+            m_CurrentIdentifier = t.asString();
+            return State::IDENTIFIER;
         }
+
+        std::cerr << "Syntax Error: Expected NUMBER or IDENTIFIER" << std::endl;
         
         return State::INVALID;
     }
 
-    Interpreter::State Interpreter::parserState2(Token& t) {
+    Interpreter::State Interpreter::parserStateNumber(Token& t) {
         if(t == Token::Type::IDENTIFIER) {
-            return State::P3;
+            m_CurrentIdentifier = t.asString();
+            return State::IDENTIFIER;
         }
+
+        std::cerr << "Syntax Error: Expected IDENTIFIER" << std::endl;
 
         return State::INVALID;
     }
 
-    Interpreter::State Interpreter::parserState3(Token& t) {
+    Interpreter::State Interpreter::parserStateIdentifier(Token& t) {
+        //Final state, save the parsed term
+        m_Terms.push_back({
+            m_CurrentSign * m_CurrentScalar,
+            m_CurrentIdentifier
+        });
+
+        //Reset
+        m_CurrentSign = 1;
+        m_CurrentIdentifier = "";
+        m_CurrentScalar = 1;
+
         if(t == Token::Type::SIGN) {
-            return State::P1;
+            m_CurrentSign = intFromSign(t.asString());
+            return State::SIGN;
         }
 
         return State::INVALID;
     }
 
 
-    bool Interpreter::processLine(std::string& in) {
+    std::optional<std::vector<Term>> Interpreter::processLine(std::string& in) {
+        m_State = State::START;
+        m_Terms.clear();
+        m_CurrentIdentifier = "";
+        m_CurrentScalar = 1;
+        m_CurrentSign = 1;
+
         Lexer lexer(in);
-        m_State = State::P0;
 
         //We are parsing this lang:
         //(+|-)*((+|-)(NUMBER IDENTIFIER|IDENTIFIER))+
 
-        int scalar = 0;
-        std::string literal;
-
         for(Token token = lexer.next(); token != Token::Type::END; token = lexer.next()) {
 
             switch (m_State) {
-                case State::P0: m_State = parserState0(token); break;
-                case State::P1: m_State = parserState1(token); break;
-                case State::P2: m_State = parserState2(token); break;
-                case State::P3: m_State = parserState3(token); break;
+                case State::START: m_State = parserStateStart(token); break;
+                case State::SIGN: m_State = parserStateSign(token); break;
+                case State::NUMBER: m_State = parserStateNumber(token); break;
+                case State::IDENTIFIER: m_State = parserStateIdentifier(token); break;
 
-                case State::INVALID: return false;
+                case State::INVALID: return {};
                 default: std::cerr << "Error: invalid parser state." << std::endl; abort(); break;
             }
 
         }
 
-        //Only return true if we end on an Identifier
-        return m_State == State::P3;
+        //Add remaining identifier
+        if(m_State == State::IDENTIFIER) {
+            m_Terms.push_back({
+                m_CurrentSign * m_CurrentScalar,
+                m_CurrentIdentifier
+            });
+
+            return m_Terms;
+        } else {
+            return {};
+        }
     }
     
 } // namespace LES
